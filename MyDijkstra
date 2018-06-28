@@ -1,8 +1,7 @@
 import java.util.Scanner;
-//assuming source is (0, 0)
 //assuming vertices are connected up, down, left, right
 //0s on the graph are walls
-public class MyDijkstra {
+public class MyDijsktra {
 	public static int counter = 0;
 	static final int rows = 5;//# rows in graph
 	static final int cols = 5;//# columns in graph
@@ -18,7 +17,7 @@ public class MyDijkstra {
 		System.out.println("x,y: ");
 		pos = reader.nextLine().split(",");
 		reader.close();
-		int source = Integer.parseInt(pos[0])*10 + Integer.parseInt(pos[1]);
+		int source = Integer.parseInt(pos[0])*rows + Integer.parseInt(pos[1]);
 		search (graph, source);
 	}
 	public static void search(int [][] graph, int source) {
@@ -34,9 +33,9 @@ public class MyDijkstra {
 			closed[i] = false;
 		}
 		//find mininum distance value for every vertex
-		int lowestAdj = 0; //set source to (0, 0)
-		distance[0] = 1;
-		closed[0] = true;
+		int lowestAdj = source;
+		distance[source] = graph[source/rows][source%rows];
+		closed[source] = true;
 		outerloop:
 			for (int i = 0; i < rows*cols; i++) {
 				//change distances of neighboring vertices
@@ -54,6 +53,14 @@ public class MyDijkstra {
 							&& distance[adjIndex] < distance[lowestAdj] + graph[adjIndex/rows][adjIndex%rows]
 									&& distance[adjIndex] == -1) {			
 						distance[adjIndex] = distance[lowestAdj] + graph[adjIndex/rows][adjIndex%rows];
+						/*for (int k = 0; k < rows*cols; k++) {
+							if (counter%5 == 0)
+								System.out.println();
+							System.out.print(distance[k]+ " ");
+							counter++;
+						}
+						counter = 0;
+						System.out.println();*/
 					}
 				}
 				lowestAdj = findMin(distance, closed, graph);
