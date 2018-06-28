@@ -1,0 +1,116 @@
+import java.util.Scanner;
+//assuming source is (0, 0)
+//assuming vertices are connected up, down, left, right
+//0s on the graph are walls
+public class MyDijkstra {
+	public static int counter = 0;
+	static final int rows = 5;//# rows in graph
+	static final int cols = 5;//# columns in graph
+	public static void main (String [] args) {
+		int graph [][] = {{1, 2, 0, 3, 4},
+						  {3, 5, 0, 2, 3},
+						  {2, 0, 4, 7, 3},
+						  {3, 2, 3, 0, 3},
+						  {5, 4, 7, 0, 1}};
+		String[] pos = new String[2];
+		Scanner reader = new Scanner(System.in); 
+		System.out.println("Where would you like to start?");
+		System.out.println("x,y: ");
+		pos = reader.nextLine().split(",");
+		reader.close();
+		int source = Integer.parseInt(pos[0])*10 + Integer.parseInt(pos[1]);
+		search (graph, source);
+	}
+	public static void search(int [][] graph, int source) {
+		boolean closed [] = new boolean [rows*cols]; //array of passed over vertices
+		int distance [] = new int [rows*cols];
+		//fill in distance and closed arrays
+		for (int i = 0; i < rows*cols; i++) {
+			if (graph[i/rows][i%rows] != 0) {
+				distance[i] = -1;
+			}
+			else
+				distance[i] = 0;
+			closed[i] = false;
+		}
+		//find mininum distance value for every vertex
+		int lowestAdj = 0; //set source to (0, 0)
+		distance[0] = 1;
+		closed[0] = true;
+		outerloop:
+			for (int i = 0; i < rows*cols; i++) {
+				//change distances of neighboring vertices
+				for (int adjIndex = 0; adjIndex < rows*cols; adjIndex++) {
+					//if adjIndex not already part of closed set
+					//AND the position is not a wall
+					//AND it's adjacent
+					//AND it's not the current position
+					//AND adjIndex has a lower dist value than its will-be new dist value
+					//AND adjIndex has not already been updated
+					if (!closed[adjIndex]
+							&& graph[adjIndex/rows][adjIndex%rows] != 0
+							&& isAdjacent(distance, closed, adjIndex)
+							&& adjIndex != lowestAdj
+							&& distance[adjIndex] < distance[lowestAdj] + graph[adjIndex/rows][adjIndex%rows]
+									&& distance[adjIndex] == -1) {			
+						distance[adjIndex] = distance[lowestAdj] + graph[adjIndex/rows][adjIndex%rows];
+					}
+				}
+				lowestAdj = findMin(distance, closed, graph);
+				if (lowestAdj == -1) //lowestAdj becomes -1 when the closed array is filled with true
+					break outerloop;
+				closed[lowestAdj] = true;
+			} 
+		printDistances(distance);
+	}
+	public static int findMin(int [] distance, boolean [] closed, int [][] graph) {
+		int min = Integer.MAX_VALUE;
+		int minIndex= -1;
+		for (int i = 0; i < rows*cols; i++){ 
+			//if not part of closed set AND not a wall
+			//AND less than current min AND adjacent to closed set
+			if (closed[i] == false && graph[i/rows][i%rows] != 0
+					&& distance[i] <= min
+					&& distance[i] != -1)
+			{
+				min = distance[i];
+				minIndex = i;
+			}
+		}
+		return minIndex;
+	}
+	//inefficient
+	public static boolean isAdjacent (int [] distance, boolean [] closed, int index) {
+		//is upper bounded, can check up
+		if (index/rows != 0) {
+			if (closed[index-5] == true) {
+				return true;
+			}
+		}
+		//is left bounded, can check left, exception made for (0, 0)
+		if (index != 0 && index%rows != 0) {
+			if (closed[index-1] == true) {
+				return true;
+			}
+		}
+		//is right bounded, can check right, exception made for (4, 4)
+		if (index != 24 && index%rows != 4) {
+			if (closed[index+1] == true) {
+				return true;
+			}
+		}
+		//is lower bounded, can check down
+		if (index/rows != 4) {
+			if (closed[index+5] == true) {
+				return true;
+			}
+		}
+		return false; //no adjacent vertex in closed set
+	}
+	public static void printDistances(int [] distance) {
+		for (int i = 0; i < rows*cols; i++) {
+			System.out.println("index: (" + i/rows + ", " + i%rows
+					+ ") distance from source: " + distance[i]);
+		}
+	}
+}
