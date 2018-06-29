@@ -1,0 +1,149 @@
+import java.util.Scanner;
+
+public class MyAStar {
+	static int counter = 0;
+	private static final int rows = 5;
+	private static final int cols = 5;
+	private static int [][] E = new int [rows][cols];
+	public static void main (String [] args) {
+		int graph [][] = {{1, 2, 0, 3, 4},
+						{3, 3, 3, 0, 3},
+						{2, 0, 4, 7, 3},
+						{3, 2, 3, 0, 3},
+						{5, 4, 7, 4, 1}};
+		String[] sPos = new String[2];
+		String[] ePos = new String[2];
+		double [][] E = new double [rows][cols];
+		Scanner reader = new Scanner(System.in); 
+		System.out.println("Where would you like to start?");
+		System.out.println("x,y: ");
+		sPos = reader.nextLine().split(",");
+		System.out.println("Where would you like to end?");
+		System.out.println("x,y: ");
+		ePos = reader.nextLine().split(",");
+		reader.close();
+		int source = Integer.parseInt(sPos[0])*rows + Integer.parseInt(sPos[1]);
+		int end = Integer.parseInt(ePos[0])*rows + Integer.parseInt(ePos[1]);
+		heuristic (E, ePos);
+		search (graph, E, source, end);
+	}
+	public static double [][] heuristic (double [][] E, String [] ePos){
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				E[i][j] = Math.sqrt(Math.pow(Math.abs(Integer.parseInt(ePos[0]) - i), 2) + Math.pow(Math.abs(Integer.parseInt(ePos[1]) - j), 2));
+				System.out.print(E[i][j] + " ");
+			}
+			System.out.println();
+		}
+		return E;
+	}
+	public static void search(int [][] graph, double [][] E, int source, int end) {
+		boolean closed [] = new boolean [rows*cols]; //array of passed over vertices
+		double [][] combined = new double [rows][cols];//f = g + h
+		int distance [] = new int [rows*cols];
+		//fill in distance and closed arrays
+		for (int i = 0; i < rows*cols; i++) {
+			if (graph[i/rows][i%rows] != 0) {
+				distance[i] = -1;
+			}
+			else
+				distance[i] = 0;
+			closed[i] = false;
+		}
+
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				combined[i][j] = graph[i][j] + E[i][j];
+			}
+		}
+
+		//find mininum distance value for every vertex
+		int lowestAdj = source;
+		distance[source] = graph[source/rows][source%rows];
+		closed[source] = true;
+		outerloop:
+			for (int i = 0; i < rows*cols; i++) {
+				//change distances of neighboring vertices
+				for (int adjIndex = 0; adjIndex < rows*cols; adjIndex++) {
+					//if adjIndex not already part of closed set
+					//AND the position is not a wall
+					//AND it's adjacent
+					//AND it's not the current position
+					//AND adjIndex has a lower dist value than  value
+					//AND adjIndex has not already been updated
+					if (!closed[adjIndex]
+							&& graph[adjIndex/rows][adjIndex%rows] != 0
+							&& isAdjacent(distance, closed, adjIndex)
+							&& adjIndex != lowestAdj
+							&& distance[adjIndex] < distance[lowestAdj] + graph[adjIndex/rows][adjIndex%rows]
+									&& distance[adjIndex] == -1) {			
+						distance[adjIndex] = distance[lowestAdj] + graph[adjIndex/rows][adjIndex%rows];
+						for (int k = 0; k < rows*cols; k++) {
+							if (counter%5 == 0)
+								System.out.println();
+							System.out.print(distance[k]+ " ");
+							counter++;
+						}
+						counter = 0;
+						System.out.println();
+					}
+				}
+				lowestAdj = findMin(distance, combined, closed, graph);
+				if (lowestAdj == -1 || lowestAdj == end) //lowestAdj becomes -1 when the closed array is filled with true
+					break outerloop;
+				closed[lowestAdj] = true;
+			} 
+		printPath(distance, end);
+	}
+
+	public static int findMin(int [] distance, double [][] combined, boolean [] closed, int [][] graph) {
+		double min = Double.MAX_VALUE;
+		int minIndex= -1;
+		for (int i = 0; i < rows*cols; i++){ 
+			//if not part of closed set AND not a wall
+			//AND less than current min AND adjacent to closed set
+			if (closed[i] == false && graph[i/rows][i%rows] != 0
+					&& combined[i/rows][i%rows] <= min
+					&& distance[i] != -1)
+			{
+				min = combined[i/rows][i%rows];
+				minIndex = i;
+			}
+		}
+		return minIndex;
+	}
+	public static boolean isAdjacent (int [] distance, boolean [] closed, int index) {
+		//is upper bounded, can check up
+		if (index/rows != 0) {
+			if (closed[index-5] == true) {
+				return true;
+			}
+		}
+		//is left bounded, can check left, exception made for (0, 0)
+		if (index != 0 && index%rows != 0) {
+			if (closed[index-1] == true) {
+				return true;
+			}
+		}
+		//is right bounded, can check right, exception made for (4, 4)
+		if (index != 24 && index%rows != 4) {
+			if (closed[index+1] == true) {
+				return true;
+			}
+		}
+		//is lower bounded, can check down
+		if (index/rows != 4) {
+			if (closed[index+5] == true) {
+				return true;
+			}
+		}
+		return false; //no adjacent vertex in closed set
+	}
+	public static void printPath(int [] distance, int end) {
+		if (distance[end] == -1) {
+			System.out.println("oops, something went wrong");
+		}
+		else 
+			System.out.println("the distance to (" + end/rows + ", " + end%rows + ") is " + distance[end]);
+	}
+}
