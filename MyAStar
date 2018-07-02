@@ -98,10 +98,10 @@ public class MyAStar {
 			//if not part of closed set AND not a wall
 			//AND less than current min AND adjacent to closed set
 			if (closed[i] == false && graph[i/rows][i%rows] != 0
-					&& distance[i]+3*E[i/rows][i%rows] <= min
+					&& distance[i]+E[i/rows][i%rows] <= min
 					&& distance[i] != -1)
 			{
-				min = distance[i]+3*E[i/rows][i%rows]; //f = g + h
+				min = distance[i]+E[i/rows][i%rows]; //f = g + h
 				minIndex = i;
 			}
 		}
