@@ -13,7 +13,7 @@ public class MyAStar {
 						{5, 4, 7, 4, 1}};
 		String[] sPos = new String[2];
 		String[] ePos = new String[2];
-		double [][] E = new double [rows][cols];
+		int [][] E = new int [rows][cols];
 		Scanner reader = new Scanner(System.in); 
 		System.out.println("Where would you like to start?");
 		System.out.println("x,y: ");
@@ -27,34 +27,29 @@ public class MyAStar {
 		heuristic (E, ePos);
 		search (graph, E, source, end);
 	}
-	public static double [][] heuristic (double [][] E, String [] ePos){
+	public static int [][] heuristic (int [][] E, String [] ePos){
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols; j++) {
-				E[i][j] = Math.sqrt(Math.pow(Math.abs(Integer.parseInt(ePos[0]) - i), 2) + Math.pow(Math.abs(Integer.parseInt(ePos[1]) - j), 2));
+				E[i][j] = Math.abs(i-Integer.parseInt(ePos[0])) + Math.abs(j-Integer.parseInt(ePos[1]));
 				System.out.print(E[i][j] + " ");
 			}
 			System.out.println();
 		}
 		return E;
 	}
-	public static void search(int [][] graph, double [][] E, int source, int end) {
+	public static void search(int [][] graph, int [][] E, int source, int end) {
 		boolean closed [] = new boolean [rows*cols]; //array of passed over vertices
-		double [][] combined = new double [rows][cols];//f = g + h
+		//double [][] combined = new double [rows][cols];//f = g + h
 		int distance [] = new int [rows*cols];
 		//fill in distance and closed arrays
 		for (int i = 0; i < rows*cols; i++) {
 			if (graph[i/rows][i%rows] != 0) {
 				distance[i] = -1;
+				//combined[i] = -1;
 			}
 			else
 				distance[i] = 0;
 			closed[i] = false;
-		}
-
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
-				combined[i][j] = graph[i][j] + E[i][j];
-			}
 		}
 
 		//find mininum distance value for every vertex
@@ -88,25 +83,25 @@ public class MyAStar {
 						System.out.println();
 					}
 				}
-				lowestAdj = findMin(distance, combined, closed, graph);
+				lowestAdj = findMin(distance, E, closed, graph);
 				if (lowestAdj == -1 || lowestAdj == end) //lowestAdj becomes -1 when the closed array is filled with true
 					break outerloop;
 				closed[lowestAdj] = true;
 			} 
-		printPath(distance, end);
+		printPath(distance, source, end);
 	}
 
-	public static int findMin(int [] distance, double [][] combined, boolean [] closed, int [][] graph) {
-		double min = Double.MAX_VALUE;
+	public static int findMin(int [] distance, int [][] E, boolean [] closed, int [][] graph) {
+		int min = Integer.MAX_VALUE;
 		int minIndex= -1;
 		for (int i = 0; i < rows*cols; i++){ 
 			//if not part of closed set AND not a wall
 			//AND less than current min AND adjacent to closed set
 			if (closed[i] == false && graph[i/rows][i%rows] != 0
-					&& combined[i/rows][i%rows] <= min
+					&& distance[i]+3*E[i/rows][i%rows] <= min
 					&& distance[i] != -1)
 			{
-				min = combined[i/rows][i%rows];
+				min = distance[i]+3*E[i/rows][i%rows]; //f = g + h
 				minIndex = i;
 			}
 		}
@@ -139,11 +134,11 @@ public class MyAStar {
 		}
 		return false; //no adjacent vertex in closed set
 	}
-	public static void printPath(int [] distance, int end) {
+	public static void printPath(int [] distance, int source, int end) {
 		if (distance[end] == -1) {
 			System.out.println("oops, something went wrong");
 		}
 		else 
-			System.out.println("the distance to (" + end/rows + ", " + end%rows + ") is " + distance[end]);
+			System.out.println("the distance to (" + end/rows + ", " + end%rows + ") is " + (distance[end]-distance[source]));
 	}
 }
