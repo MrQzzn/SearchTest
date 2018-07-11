@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script src="Loop.js"></script>
+<div style="position: absolute; right: 200px; top: 200px">
+    <form id = "form">
+    <h1>Visualization</h1>
+    Start position: <br><br>
+    X coordinate: <input type="number" id="startX"/>
+    Y coordinate: <input type="number" id="startY"/><br><br>
+    End position: <br><br>
+    X coordinate: <input type="number" id="endX"/>
+    Y coordinate: <input type="number" id="endY"/><br><br>
+    Weight: 	   <input type="number" id="weight"/><br><br>
+
+    <button id="inputButton" onclick="input()">Set Values</button>
+
+    </form>
+
+</div>
+    <h3>Grid</h3>
+    <canvas id="canvas" width ="500" height="500">
+        No canvas support.
+    </canvas>
+<script src = AStar.js></script>
+</body>
+</html>
