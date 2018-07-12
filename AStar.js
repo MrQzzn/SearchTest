@@ -66,6 +66,16 @@ function drawGrid(closed, dist, graph) {
             ctx.fill();
         }
     }
+    var j = 0;
+    ctx.font="30px Georgia";
+    ctx.fillStyle = 'rgba(255, 179,0,1)';
+    for (var y = 50; y < 1000; y+=100){
+        for (var x = 35; x < 1000; x+=100){
+
+            ctx.fillText(dist[j],x,y);
+            j++;
+        }
+    }
 }
 
 function create(){
