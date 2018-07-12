@@ -14,23 +14,70 @@ function input(){
     weight = parseInt(document.getElementById("weight").value);
     document.write("START = " + start +  " END = " + end + " WEIGHT = " + weight);
 }
-function initGrid(){
 
-}
-function drawGrid(closed, dist, graph) {
-    var c = document.getElementById('canvas');
-    var ctx = c.getContext('2d');
+function drawGrid(graph){
+    var g = document.getElementById('grid');
+    var ctx = g.getContext('2d');
+    g.style.left = "0 px";
+    g.style.top = "0 px";
+    g.style.position = "absolute";
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 4;
 
-    //mClosed.sort( function(a, b) { return a - b; } );
-    for (var i = 0; i < 10; i++){
-        for (var j = 0; j < 10; j++){
-            document.write(graph[i][j] + " ");
-        }
-        document.write("<br>");
-    }
+    var gridCanvasSize = 1000;
+    var boxSize = gridCanvasSize/rows;
 
+    var i = 0;
+    for (var y = 0; y < cols; y++){
+        for (var x = 0; x < rows; x++){
+
+            if (i === source){
+                ctx.fillStyle = 'rgba(196,0,255,1)'; //source = purple
+            }
+            else if (i === end){
+                ctx.fillStyle = 'rgba(256,0,0,1)'; //goal = red
+            }
+            else if (graph[Math.floor(i/rows)][i%cols] === 0){ //a wall
+                ctx.fillStyle = 'rgba(165,165,165,1)';
+            }
+            else{
+                ctx.fillStyle = 'rgba(256,256,256,1)';
+            }
+            ctx.beginPath();
+            ctx.moveTo(x * boxSize, y * boxSize);
+            ctx.lineTo(x * boxSize + boxSize, y * boxSize);
+            ctx.stroke();
+            ctx.lineTo(x * boxSize + boxSize, y * boxSize + boxSize);
+            ctx.stroke();
+            ctx.lineTo(x * boxSize, y * boxSize + boxSize);
+            ctx.stroke();
+            ctx.lineTo(x * boxSize, y * boxSize);
+            ctx.stroke();
+            ctx.fill();
+            i++;
+        }
+    }
+    var j = 0;
+    ctx.font="30px Georgia";
+    ctx.fillStyle = 'rgba(110,0,132,1)';
+    for (var y = boxSize/2; y < gridCanvasSize; y+=boxSize){
+        for (var x = boxSize/2 - 0.15*boxSize; x < gridCanvasSize; x+=boxSize){
+            ctx.fillText(graph[Math.floor(j/rows)][j%rows],x,y);
+            j++;
+        }
+    }
+}
+function drawPath(closed, dist, graph) {
+    var p = document.getElementById('path');
+    var ctx = p.getContext('2d');
+    p.style.left = "1100 px";
+    p.style.position = "absolute";
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 4;
+
+    var pathCanvasSize = 1000;
+    var boxSize = pathCanvasSize/rows;
+    //mClosed.sort( function(a, b) { return a - b; } );
     var i = 0;
     for (var y = 0; y < cols; y++) {
         for (var x = 0; x < rows; x++) { //add boxes by rows
@@ -41,37 +88,35 @@ function drawGrid(closed, dist, graph) {
                 ctx.fillStyle = 'rgba(256,0,0,1)'; //goal = red
             }
             else if (graph[Math.floor(i/rows)][i%cols] === 0){ //a wall
-                document.write("index " + i + " is a wall");
                 ctx.fillStyle = 'rgba(165,165,165,1)';
             }
             else if (closed[i] === true) { //visited
-                ctx.fillStyle = 'rgba(0,256,0,1)';
+                ctx.fillStyle = 'rgba(0,255,0,1)';
                 //i++; i++ in if statement only for numerical array of visited indices
             }
             else if (dist[y*rows + x] !== -1) //not visited but are accounted for, "adjacent boxes"
-                ctx.fillStyle = 'rgba(0,0,256,1)';
+                ctx.fillStyle = 'rgba(0,255,154,1)';
             else                              //everything not visited or adjacent
                 ctx.fillStyle = 'rgba(256,256,256,1)';
             i++;
             ctx.beginPath();
-            ctx.moveTo(x * 100, y * 100);
-            ctx.lineTo(x * 100 + 100, y * 100);
+            ctx.moveTo(x * boxSize, y * boxSize);
+            ctx.lineTo(x * boxSize + boxSize, y * boxSize);
             ctx.stroke();
-            ctx.lineTo(x * 100 + 100, y * 100 + 100);
+            ctx.lineTo(x * boxSize + boxSize, y * boxSize + boxSize);
             ctx.stroke();
-            ctx.lineTo(x * 100, y * 100 + 100);
+            ctx.lineTo(x * boxSize, y * boxSize + boxSize);
             ctx.stroke();
-            ctx.lineTo(x * 100, y * 100);
+            ctx.lineTo(x * boxSize, y * boxSize);
             ctx.stroke();
             ctx.fill();
         }
     }
     var j = 0;
     ctx.font="30px Georgia";
-    ctx.fillStyle = 'rgba(255, 179,0,1)';
-    for (var y = 50; y < 1000; y+=100){
-        for (var x = 35; x < 1000; x+=100){
-
+    ctx.fillStyle = 'rgba(110,0,132,1)';
+    for (var y = boxSize/2; y < pathCanvasSize; y+=boxSize){
+        for (var x = boxSize/2 - 0.15*boxSize; x < pathCanvasSize; x+=boxSize){
             ctx.fillText(dist[j],x,y);
             j++;
         }
@@ -82,40 +127,38 @@ function create(){
     var graph = [];
     //input();
     counter = 0;
-    rows = 10;
-    cols = 10;
-    createGraph(graph);
-    weight = 20;
+    rows = 12;
+    cols = 12;
+    weight = 5;
+    source = 98;
+    end = 44;
 
-    source = 0;
-    end = 99;
+    createGraph(graph);
+    drawGrid(graph);
     search(graph);
 }
 function createGraph(graph){
-
-    document.write("here");
     for (var i = 0; i < rows; i++){
         graph[i] = [];
         for (var j = 0; j < cols; j++){
             graph[i][j] = Math.floor(Math.random() * 10);
+            if ((i*rows + j) === source || (i*rows + j) === end) { //if i is either source or end, while graph of i = 0, keep switching values
+                while (graph[i][j] === 0) {
+                    graph[i][j] = Math.floor(Math.random() * 10);
+                }
+            }
         }
-    }
-    for (var i = 0; i < 10; i++){
-        for (var j = 0; j < 10; j++){
-            document.write(graph[i][j] + " ");
-        }
-        document.write("<br>");
     }
     return graph;
 }
 function heuristic(E){
-    document.write("heuristic values: ");
+    //document.write("heuristic values: ");
     for (var i = 0; i < rows*cols; i++){
         E.push(Math.abs(Math.floor(end/rows) - Math.floor(i/rows)) + Math.abs(end%rows - i%rows))
-        if (counter%rows === 0)
+        /*if (counter%rows === 0)
             document.write("<br>");
         document.write(E[i] + " ");
-        counter++;
+        counter++;*/
     }
 }
 function search(graph) {
@@ -124,16 +167,17 @@ function search(graph) {
     var dist = [];
     var E = [];
     heuristic(E);
-    for (var i = 0; i < rows * cols; i++) {
-        closed[i] = false;
+    for (var i = 0; i < rows * cols; i++) {//initialize arrays
+
+    closed[i] = false;
         if (graph[Math.floor((i / rows))][i % cols] !== 0) {
             dist.push(-1);
         }
         else {
             dist.push(0);
         }
-    }//initialize arrays
-    document.write("<br> initial dist[]:");
+    }
+    /*document.write("<br> initial dist[]:");
     for (var i = 0; i < rows*cols; i++){
         if (counter%rows === 0)
             document.write("<br>");
@@ -146,12 +190,10 @@ function search(graph) {
             document.write("<br>");
         document.write(closed[i] + " ");
         counter++;
-    }
-
+    }*/
     var lowestAdj = source; //initialize first adj index to source
-    dist[source] = graph[Math.floor(source / rows)][source % cols]; //fill source's distance value
+    dist[source] = 0; //we start at 0 distance
     closed[source] = true; //change source's closed value
-
     loop1:
     for (var j = 0; j < rows * cols; j++) {
         for (var adjIndex = 0; adjIndex < rows * cols; adjIndex++) {
@@ -165,40 +207,35 @@ function search(graph) {
 
                 dist[adjIndex] = dist[lowestAdj] + graph[Math.floor(adjIndex / rows)][adjIndex % cols];
 
-                for (var k = 0; k < rows*cols; k++) {
+                /*for (var k = 0; k < rows*cols; k++) {
                     if (counter%rows === 0)
                         document.write("<br>");
                     document.write(dist[k]+ " ");
                     counter++;
                 }
                 counter = 0;
-                document.write("<br>");
+                document.write("<br>");*/
             }
         }
         lowestAdj = findMin(dist, E, closed, graph);
         mClosed.push(lowestAdj); //in case i need it, closed does the job right now
         closed[lowestAdj] = true;
         if (lowestAdj === -1 || lowestAdj === end) //lowestAdj becomes -1 when the closed array is filled with true
-            break loop1; //hmmmm....
-
+            break loop1;
     }
     printPath(dist);
-    drawGrid(closed, dist, graph);
+    drawPath(closed, dist, graph);
 }
 function findMin(dist, E, closed, graph){
-
     var min = 42424242;
     var minIndex= -1;
     for (var i = 0; i < rows*cols; i++){
-
         //if not part of closed set AND not a wall
         //AND less than current min AND adjacent to closed set
-
         if (closed[i] === false && graph[Math.floor(i/rows)][i%cols] !== 0
             && dist[i]+ weight*E[i] <= min
             && dist[i] !== -1)
         {
-
             min = dist[i]+ weight*E[i]; //f = g + h
             minIndex = i;
         }
@@ -206,35 +243,26 @@ function findMin(dist, E, closed, graph){
     return minIndex;
 }
 function isAdjacent(closed, index){
-
     if (Math.floor(index/rows) !== 0) {
-
         if (closed[index-rows] === true) {
-
             return true;
         }
     }
     //is left bounded, can check left, exception made for (0, 0)
     if (index !== 0 && index%rows !== 0) {
-
         if (closed[index-1] === true) {
-
             return true;
         }
     }
     //is right bounded, can check right, exception made for (4, 4)
-    if (index !== 99 && index%rows !== 9) {
-
+    if (index !== (rows*cols-1) && index%rows !== (cols-1)) {
         if (closed[index+1] === true) {
-
             return true;
         }
     }
     //is lower bounded, can check down
-    if (Math.floor(index/rows) !== 9) {
-
+    if (Math.floor(index/rows) !== (rows-1)) {
         if (closed[index+rows] === true) {
-
             return true;
         }
     }
