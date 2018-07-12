@@ -6,7 +6,7 @@
 </head>
 <body>
 <script src="Loop.js"></script>
-<div style="position: absolute; right: 200px; top: 200px">
+<div style="position: absolute; left: 100px; top: 1100px">
     <form id = "form">
     <h1>Visualization</h1>
     Start position: <br><br>
@@ -22,10 +22,18 @@
     </form>
 
 </div>
-    <h3>Grid</h3>
-    <canvas id="canvas" width ="1000" height="1000">
+    <div style="position: absolute; top: 0px; left: 0px;">
+        <h1>Grid</h1>
+    <canvas id="grid" width ="1000" height="1000" style="position:absolute; z-index: 0">
         No canvas support.
     </canvas>
+    </div>
+    <div style="position: absolute; top: 0px; left: 1100px;">
+        <h1>Path</h1>
+        <canvas id="path" width ="1000" height="1000" style="position: absolute; z-index: 1">
+        No canvas support.
+    </canvas>
+    </div>
 <script src = AStar.js></script>
 </body>
 </html>
