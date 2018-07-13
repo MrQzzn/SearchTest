@@ -57,7 +57,7 @@ function drawGrid(graph){
             i++;
         }
     }
-    var j = 0;
+    /*var j = 0;
     ctx.font="30px Georgia";
     ctx.fillStyle = 'rgba(110,0,132,1)';
     for (var y = boxSize/2; y < gridCanvasSize; y+=boxSize){
@@ -65,7 +65,7 @@ function drawGrid(graph){
             ctx.fillText(graph[Math.floor(j/rows)][j%rows],x,y);
             j++;
         }
-    }
+    }*/
 }
 function drawPath(closed, dist, graph) {
     var p = document.getElementById('path');
@@ -117,34 +117,50 @@ function drawPath(closed, dist, graph) {
     ctx.fillStyle = 'rgba(110,0,132,1)';
     for (var y = boxSize/2; y < pathCanvasSize; y+=boxSize){
         for (var x = boxSize/2 - 0.15*boxSize; x < pathCanvasSize; x+=boxSize){
-            ctx.fillText(dist[j],x,y);
+            if (dist[j] !== -1 && dist[j] !== 0)
+                ctx.fillText(dist[j],x,y);
             j++;
         }
     }
 }
-
 function create(){
     var graph = [];
     //input();
     counter = 0;
-    rows = 12;
-    cols = 12;
+    rows = 30;
+    cols = 30;
     weight = 5;
-    source = 98;
-    end = 44;
+    source = 0;
+    end = 899;
 
     createGraph(graph);
     drawGrid(graph);
     search(graph);
 }
 function createGraph(graph){
-    for (var i = 0; i < rows; i++){
+    /*for (var i = 0; i < rows; i++){
         graph[i] = [];
         for (var j = 0; j < cols; j++){
             graph[i][j] = Math.floor(Math.random() * 10);
             if ((i*rows + j) === source || (i*rows + j) === end) { //if i is either source or end, while graph of i = 0, keep switching values
                 while (graph[i][j] === 0) {
                     graph[i][j] = Math.floor(Math.random() * 10);
+                }
+            }
+        }
+    }*/
+    for (var i = 0; i < rows; i++) {
+        graph[i] = [];
+        for (var j = 0; j < cols; j++) {
+            var chance = Math.floor(Math.random() * 4);
+            if (chance === 0){
+                graph[i][j] = 0;
+            }
+            else
+                graph[i][j] = 1;
+            if ((i * rows + j) === source || (i * rows + j) === end) { //if i is either source or end, while graph of i = 0, keep switching values
+                while (graph[i][j] === 0) {
+                    graph[i][j] = 1;
                 }
             }
         }
@@ -161,7 +177,11 @@ function heuristic(E){
         counter++;*/
     }
 }
-function search(graph) {
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+async function search(graph) {
     var closed = [];
     var mClosed = [];
     var dist = [];
@@ -169,7 +189,7 @@ function search(graph) {
     heuristic(E);
     for (var i = 0; i < rows * cols; i++) {//initialize arrays
 
-    closed[i] = false;
+        closed[i] = false;
         if (graph[Math.floor((i / rows))][i % cols] !== 0) {
             dist.push(-1);
         }
@@ -195,36 +215,29 @@ function search(graph) {
     dist[source] = 0; //we start at 0 distance
     closed[source] = true; //change source's closed value
     loop1:
-    for (var j = 0; j < rows * cols; j++) {
-        for (var adjIndex = 0; adjIndex < rows * cols; adjIndex++) {
+        for (var j = 0; j < rows * cols; j++) {
+            for (var adjIndex = 0; adjIndex < rows * cols; adjIndex++) {
 
-            if (!closed[adjIndex]
-                && graph[Math.floor(adjIndex / rows)][adjIndex % cols] !== 0
-                && isAdjacent(closed, adjIndex)
-                && adjIndex !== lowestAdj
-                && dist[adjIndex] < dist[lowestAdj] + graph[Math.floor(adjIndex / rows)][adjIndex % cols]
-                && dist[adjIndex] === -1) {
+                if (!closed[adjIndex]
+                    && graph[Math.floor(adjIndex / rows)][adjIndex % cols] !== 0
+                    && isAdjacent(closed, adjIndex)
+                    && adjIndex !== lowestAdj
+                    && dist[adjIndex] < dist[lowestAdj] + graph[Math.floor(adjIndex / rows)][adjIndex % cols]
+                    && dist[adjIndex] === -1) {
 
-                dist[adjIndex] = dist[lowestAdj] + graph[Math.floor(adjIndex / rows)][adjIndex % cols];
-
-                /*for (var k = 0; k < rows*cols; k++) {
-                    if (counter%rows === 0)
-                        document.write("<br>");
-                    document.write(dist[k]+ " ");
-                    counter++;
+                    dist[adjIndex] = dist[lowestAdj] + graph[Math.floor(adjIndex / rows)][adjIndex % cols];
                 }
-                counter = 0;
-                document.write("<br>");*/
             }
+            lowestAdj = findMin(dist, E, closed, graph);
+            mClosed.push(lowestAdj); //in case i need it, closed does the job right now
+            closed[lowestAdj] = true;
+            drawPath(closed, dist, graph);
+
+            if (lowestAdj === -1 || lowestAdj === end) //lowestAdj becomes -1 when the closed array is filled with true
+                break loop1;
+            await sleep(50);
         }
-        lowestAdj = findMin(dist, E, closed, graph);
-        mClosed.push(lowestAdj); //in case i need it, closed does the job right now
-        closed[lowestAdj] = true;
-        if (lowestAdj === -1 || lowestAdj === end) //lowestAdj becomes -1 when the closed array is filled with true
-            break loop1;
-    }
-    printPath(dist);
-    drawPath(closed, dist, graph);
+    printPath(dist); //using document.write() clears the page
 }
 function findMin(dist, E, closed, graph){
     var min = 42424242;
@@ -243,6 +256,7 @@ function findMin(dist, E, closed, graph){
     return minIndex;
 }
 function isAdjacent(closed, index){
+    //is up bounded, can check up
     if (Math.floor(index/rows) !== 0) {
         if (closed[index-rows] === true) {
             return true;
@@ -270,8 +284,8 @@ function isAdjacent(closed, index){
 }
 function printPath(dist) {
     if (dist[end] === -1) {
-        document.write("oops, something went wrong");
+        console.log("oops, something went wrong");
     }
     else
-        document.write("the distance to (" + Math.floor(end/rows) + ", " + end%rows + ") is " + (dist[end]-dist[source]));
+        console.log("the distance to (" + Math.floor(end/rows) + ", " + end%rows + ") is " + (dist[end]-dist[source]));
 }
