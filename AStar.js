@@ -15,7 +15,7 @@ function input(){
     document.write("START = " + start +  " END = " + end + " WEIGHT = " + weight);
 }
 
-function drawGrid(graph){
+/*function drawGrid(graph){
     var g = document.getElementById('grid');
     var ctx = g.getContext('2d');
     g.style.left = "0 px";
@@ -57,7 +57,7 @@ function drawGrid(graph){
             i++;
         }
     }
-    /*var j = 0;
+    var j = 0;
     ctx.font="30px Georgia";
     ctx.fillStyle = 'rgba(110,0,132,1)';
     for (var y = boxSize/2; y < gridCanvasSize; y+=boxSize){
@@ -65,8 +65,8 @@ function drawGrid(graph){
             ctx.fillText(graph[Math.floor(j/rows)][j%rows],x,y);
             j++;
         }
-    }*/
-}
+    }
+}*/
 function drawPath(closed, dist, graph) {
     var p = document.getElementById('path');
     var ctx = p.getContext('2d');
@@ -112,7 +112,7 @@ function drawPath(closed, dist, graph) {
             ctx.fill();
         }
     }
-    var j = 0;
+    /*var j = 0;
     ctx.font="30px Georgia";
     ctx.fillStyle = 'rgba(110,0,132,1)';
     for (var y = boxSize/2; y < pathCanvasSize; y+=boxSize){
@@ -121,7 +121,7 @@ function drawPath(closed, dist, graph) {
                 ctx.fillText(dist[j],x,y);
             j++;
         }
-    }
+    }*/
 }
 function create(){
     var graph = [];
@@ -134,7 +134,7 @@ function create(){
     end = 899;
 
     createGraph(graph);
-    drawGrid(graph);
+    //drawGrid(graph);
     search(graph);
 }
 function createGraph(graph){
