@@ -335,7 +335,7 @@ function chartPath(dist, closed) {
     for (var i = 0; i < closed.length; i++){ //path can be as long as closed, could use more efficient loop but no idea how to move closed's true values into a separate array
         for (var j = 0; j < closed.length; j++) { //search through every closed value for earlier connection in the path
             if (closed[j] === true) { //j is green
-                if (adjacentTo(min, j)) { //j is adjacent to current min
+                if (adjacentTo(path[index-1], j)) { //j is adjacent to last plotted value
                     if (dist[j] < dist[min]) //if j is earlier along the path than min is
                         min = j;
                 }
