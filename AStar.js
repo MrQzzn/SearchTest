@@ -67,7 +67,7 @@ function input(){
         }
     }
 }*/
-function drawPath(closed, dist, graph) {
+function drawPath(closed, dist, graph, path) {
     var p = document.getElementById('path');
     var ctx = p.getContext('2d');
     p.style.left = "1100 px";
@@ -77,7 +77,7 @@ function drawPath(closed, dist, graph) {
 
     var pathCanvasSize = 1000;
     var boxSize = pathCanvasSize/rows;
-    //mClosed.sort( function(a, b) { return a - b; } );
+
     var i = 0;
     for (var y = 0; y < cols; y++) {
         for (var x = 0; x < rows; x++) { //add boxes by rows
@@ -110,6 +110,21 @@ function drawPath(closed, dist, graph) {
             ctx.lineTo(x * boxSize, y * boxSize);
             ctx.stroke();
             ctx.fill();
+        }
+    }
+    if (path !== undefined && path.length !== 0) {
+        path.sort( function(a, b) { return a - b; } );
+        var j = 0;
+        var i = 0;
+        for (var y = boxSize/2; y < pathCanvasSize; y+=boxSize){
+            for (var x = boxSize/2 - 0.15*boxSize; x < pathCanvasSize; x+=boxSize){
+                if (i === path[j]) {
+                    ctx.fillText("O", x, y);
+                    j++;
+                }
+                i++;
+
+            }
         }
     }
     /*var j = 0;
@@ -182,6 +197,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 async function search(graph) {
+    var path = [];
     var closed = [];
     var mClosed = [];
     var dist = [];
@@ -231,12 +247,14 @@ async function search(graph) {
             lowestAdj = findMin(dist, E, closed, graph);
             mClosed.push(lowestAdj); //in case i need it, closed does the job right now
             closed[lowestAdj] = true;
-            drawPath(closed, dist, graph);
+            drawPath(closed, dist, graph, path);
 
             if (lowestAdj === -1 || lowestAdj === end) //lowestAdj becomes -1 when the closed array is filled with true
                 break loop1;
             await sleep(50);
         }
+    path = chartPath(dist, closed, path);
+    drawPath(closed, dist, graph, path);
     printPath(dist); //using document.write() clears the page
 }
 function findMin(dist, E, closed, graph){
@@ -281,6 +299,60 @@ function isAdjacent(closed, index){
         }
     }
     return false; //no adjacent vertex in closed set
+}
+function adjacentTo(center, neighbor) {
+    if (Math.floor(center / rows) !== 0) {
+        if (neighbor === (center - rows)) {
+            return true;
+        }
+    }
+    //is left bounded, can check left, exception made for (0, 0)
+    if (center !== 0 && center % rows !== 0) {
+        if (neighbor === (center - 1)) {
+            return true;
+        }
+    }
+    //is right bounded, can check right, exception made for bottom right corner
+    if (center !== (rows * cols - 1) && center % rows !== (cols - 1)) {
+        if (neighbor === (center + 1)) {
+            return true;
+        }
+    }
+    //is lower bounded, can check down
+    if (Math.floor(center / rows) !== (rows - 1)) {
+        if (neighbor === (center + rows)) {
+            return true;
+        }
+    }
+    return false; //no adjacent vertex in closed set
+}
+function chartPath(dist, closed) {
+    var path = [];
+    path.push(end);
+    var min = end;
+    var index = 1;
+    loop2:
+    for (var i = 0; i < closed.length; i++){ //path can be as long as closed, could use more efficient loop but no idea how to move closed's true values into a separate array
+        for (var j = 0; j < closed.length; j++) { //search through every closed value for earlier connection in the path
+            if (closed[j] === true) { //j is green
+                if (adjacentTo(min, j)) { //j is adjacent to current min
+                    if (dist[j] < dist[min]) //if j is earlier along the path than min is
+                        min = j;
+                }
+            }
+        }
+        if (min === source){
+            console.log("reached source");
+            break loop2;
+        }
+        if (min !== path[index-1]) {//if not the same as the last one
+            console.log("min = " + min + "<br>");
+            path.push(min); //gather indices of the path into non-ordered array
+            index++; //manual way of keeping track of used indices
+        }
+    }
+    console.log("length = " + (path.length - 1));
+    return path;
 }
 function printPath(dist) {
     if (dist[end] === -1) {
