@@ -14,59 +14,6 @@ function input(){
     weight = parseInt(document.getElementById("weight").value);
     document.write("START = " + start +  " END = " + end + " WEIGHT = " + weight);
 }
-
-/*function drawGrid(graph){
-    var g = document.getElementById('grid');
-    var ctx = g.getContext('2d');
-    g.style.left = "0 px";
-    g.style.top = "0 px";
-    g.style.position = "absolute";
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 4;
-
-    var gridCanvasSize = 1000;
-    var boxSize = gridCanvasSize/rows;
-
-    var i = 0;
-    for (var y = 0; y < cols; y++){
-        for (var x = 0; x < rows; x++){
-
-            if (i === source){
-                ctx.fillStyle = 'rgba(196,0,255,1)'; //source = purple
-            }
-            else if (i === end){
-                ctx.fillStyle = 'rgba(256,0,0,1)'; //goal = red
-            }
-            else if (graph[Math.floor(i/rows)][i%cols] === 0){ //a wall
-                ctx.fillStyle = 'rgba(165,165,165,1)';
-            }
-            else{
-                ctx.fillStyle = 'rgba(256,256,256,1)';
-            }
-            ctx.beginPath();
-            ctx.moveTo(x * boxSize, y * boxSize);
-            ctx.lineTo(x * boxSize + boxSize, y * boxSize);
-            ctx.stroke();
-            ctx.lineTo(x * boxSize + boxSize, y * boxSize + boxSize);
-            ctx.stroke();
-            ctx.lineTo(x * boxSize, y * boxSize + boxSize);
-            ctx.stroke();
-            ctx.lineTo(x * boxSize, y * boxSize);
-            ctx.stroke();
-            ctx.fill();
-            i++;
-        }
-    }
-    var j = 0;
-    ctx.font="30px Georgia";
-    ctx.fillStyle = 'rgba(110,0,132,1)';
-    for (var y = boxSize/2; y < gridCanvasSize; y+=boxSize){
-        for (var x = boxSize/2 - 0.15*boxSize; x < gridCanvasSize; x+=boxSize){
-            ctx.fillText(graph[Math.floor(j/rows)][j%rows],x,y);
-            j++;
-        }
-    }
-}*/
 function drawPath(closed, dist, graph, path) {
     var p = document.getElementById('path');
     var ctx = p.getContext('2d');
@@ -79,6 +26,7 @@ function drawPath(closed, dist, graph, path) {
     var boxSize = pathCanvasSize/rows;
 
     var i = 0;
+    var j = 0;
     for (var y = 0; y < cols; y++) {
         for (var x = 0; x < rows; x++) { //add boxes by rows
             if (i === source){
@@ -98,6 +46,10 @@ function drawPath(closed, dist, graph, path) {
                 ctx.fillStyle = 'rgba(0,255,154,1)';
             else                              //everything not visited or adjacent
                 ctx.fillStyle = 'rgba(256,256,256,1)';
+            if (path[j] === i){
+                ctx.fillStyle = 'rgba(51, 204, 255,1)';
+                j++;
+            }
             i++;
             ctx.beginPath();
             ctx.moveTo(x * boxSize, y * boxSize);
@@ -112,21 +64,7 @@ function drawPath(closed, dist, graph, path) {
             ctx.fill();
         }
     }
-    if (path !== undefined && path.length !== 0) {
-        path.sort( function(a, b) { return a - b; } );
-        var j = 0;
-        var i = 0;
-        for (var y = boxSize/2; y < pathCanvasSize; y+=boxSize){
-            for (var x = boxSize/2 - 0.15*boxSize; x < pathCanvasSize; x+=boxSize){
-                if (i === path[j]) {
-                    ctx.fillText("O", x, y);
-                    j++;
-                }
-                i++;
 
-            }
-        }
-    }
     /*var j = 0;
     ctx.font="30px Georgia";
     ctx.fillStyle = 'rgba(110,0,132,1)';
@@ -144,7 +82,7 @@ function create(){
     counter = 0;
     rows = 30;
     cols = 30;
-    weight = 5;
+    weight = 1;
     source = 0;
     end = 899;
 
@@ -192,28 +130,19 @@ function heuristic(E){
         counter++;*/
     }
 }
-function improvePath(graph){
-    var incons = [5];
-    for (var i = 0; i < 3; i++) {
-        console.log("<br> ITERATION CUT <br>");
-        //if (incons !== null && incons.length !== 0) {
-            weight -= 1;
-            search(graph, incons);
-        //}
-        //else
-          //  break;
-    }
-}
+
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-async function search(graph, incons) {
-    var path = [];
+
+async function improvePath(graph){
     var closed = [];
-    var mClosed = [];
     var dist = [];
     var E = [];
     heuristic(E);
+    
+    var incons = [];
+    
     for (var i = 0; i < rows * cols; i++) {//initialize arrays
 
         closed[i] = false;
@@ -224,6 +153,41 @@ async function search(graph, incons) {
             dist.push(0);
         }
     }
+    
+    search(graph, dist, closed, E, incons);
+    while (weight > 1){
+        weight--;
+        incons.sort( function(a, b) { return a - b; } ); //sort indices of incon in increasing order
+
+        search(graph, dist, closed, E, incons);
+    }
+    /*for (var i = 0; i < 3; i++) {
+        console.log("<br> ITERATION CUT <br>");
+        //if (incons !== null && incons.length !== 0) {
+            weight -= 1;
+            search(graph, incons);
+        //}
+        //else
+          //  break;
+    }*/
+}
+
+async function search(graph, dist, closed, E, incons) {
+
+    var path = [];
+
+    if (incons.length !== 0){
+        var j = 0;//index for incons
+        console.log("incons not empty");
+        for (var i = 0; i < closed.length; i++){
+            if (incons[j] === i ){
+                closed[i] = false;
+                j++;
+            }
+        }
+    }
+    else
+        console.log("incons is empty");
     /*document.write("<br> initial dist[]:");
     for (var i = 0; i < rows*cols; i++){
         if (counter%rows === 0)
@@ -245,6 +209,16 @@ async function search(graph, incons) {
         for (var j = 0; j < rows * cols; j++) {
             for (var adjIndex = 0; adjIndex < rows * cols; adjIndex++) {
 
+                if (closed[adjIndex] //is part of closed set
+                    && graph[Math.floor(adjIndex / rows)][adjIndex % cols] !== 0 //not a wall
+                    && isAdjacent(closed, adjIndex) //is a successor
+                    && adjIndex !== lowestAdj //not its own predecessor
+                    && dist[adjIndex] > dist[lowestAdj] + graph[Math.floor(adjIndex / rows)][adjIndex % cols] //greater than s + edge cost
+                    && dist[adjIndex] === -1) { //checking for incons
+                    
+                        incons.push(adjIndex);
+                }
+
                 if (!closed[adjIndex]
                     && graph[Math.floor(adjIndex / rows)][adjIndex % cols] !== 0
                     && isAdjacent(closed, adjIndex)
@@ -256,7 +230,6 @@ async function search(graph, incons) {
                 }
             }
             lowestAdj = findMin(dist, E, closed, graph);
-            mClosed.push(lowestAdj); //in case i need it, closed does the job right now
             closed[lowestAdj] = true;
             drawPath(closed, dist, graph, path);
 
@@ -267,7 +240,9 @@ async function search(graph, incons) {
     path = chartPath(dist, closed, path);
     drawPath(closed, dist, graph, path);
     printPath(dist); //using document.write() clears the page
-    return 1;
+    console.log("yup");
+    for (var i in incons)
+        console.log(incons[i]);
 }
 function findMin(dist, E, closed, graph){
     var min = 42424242;
@@ -364,6 +339,8 @@ function chartPath(dist, closed) {
             }
         }
     console.log("length = " + (path.length - 1));
+    path.shift();
+    path.sort( function(a, b) { return a - b; } );
     return path;
 }
 function printPath(dist) {
