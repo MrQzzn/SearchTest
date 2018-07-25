@@ -15,58 +15,6 @@ function input(){
     document.write("START = " + start +  " END = " + end + " WEIGHT = " + weight);
 }
 
-/*function drawGrid(graph){
-    var g = document.getElementById('grid');
-    var ctx = g.getContext('2d');
-    g.style.left = "0 px";
-    g.style.top = "0 px";
-    g.style.position = "absolute";
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 4;
-
-    var gridCanvasSize = 1000;
-    var boxSize = gridCanvasSize/rows;
-
-    var i = 0;
-    for (var y = 0; y < cols; y++){
-        for (var x = 0; x < rows; x++){
-
-            if (i === source){
-                ctx.fillStyle = 'rgba(196,0,255,1)'; //source = purple
-            }
-            else if (i === end){
-                ctx.fillStyle = 'rgba(256,0,0,1)'; //goal = red
-            }
-            else if (graph[Math.floor(i/rows)][i%cols] === 0){ //a wall
-                ctx.fillStyle = 'rgba(165,165,165,1)';
-            }
-            else{
-                ctx.fillStyle = 'rgba(256,256,256,1)';
-            }
-            ctx.beginPath();
-            ctx.moveTo(x * boxSize, y * boxSize);
-            ctx.lineTo(x * boxSize + boxSize, y * boxSize);
-            ctx.stroke();
-            ctx.lineTo(x * boxSize + boxSize, y * boxSize + boxSize);
-            ctx.stroke();
-            ctx.lineTo(x * boxSize, y * boxSize + boxSize);
-            ctx.stroke();
-            ctx.lineTo(x * boxSize, y * boxSize);
-            ctx.stroke();
-            ctx.fill();
-            i++;
-        }
-    }
-    var j = 0;
-    ctx.font="30px Georgia";
-    ctx.fillStyle = 'rgba(110,0,132,1)';
-    for (var y = boxSize/2; y < gridCanvasSize; y+=boxSize){
-        for (var x = boxSize/2 - 0.15*boxSize; x < gridCanvasSize; x+=boxSize){
-            ctx.fillText(graph[Math.floor(j/rows)][j%rows],x,y);
-            j++;
-        }
-    }
-}*/
 function drawPath(closed, dist, graph, path) {
     var p = document.getElementById('path');
     var ctx = p.getContext('2d');
@@ -79,6 +27,7 @@ function drawPath(closed, dist, graph, path) {
     var boxSize = pathCanvasSize/rows;
 
     var i = 0;
+    var j = 0;
     for (var y = 0; y < cols; y++) {
         for (var x = 0; x < rows; x++) { //add boxes by rows
             if (i === source){
@@ -98,6 +47,10 @@ function drawPath(closed, dist, graph, path) {
                 ctx.fillStyle = 'rgba(0,255,154,1)';
             else                              //everything not visited or adjacent
                 ctx.fillStyle = 'rgba(256,256,256,1)';
+             if (path[j] === i){
+                ctx.fillStyle = 'rgba(51, 204, 255,1)';
+                j++;
+            }
             i++;
             ctx.beginPath();
             ctx.moveTo(x * boxSize, y * boxSize);
@@ -352,6 +305,8 @@ function chartPath(dist, closed) {
         }
     }
     console.log("length = " + (path.length - 1));
+    path.shift();
+    path.sort( function(a, b) { return a - b; } );
     return path;
 }
 function printPath(dist) {
