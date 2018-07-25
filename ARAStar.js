@@ -82,7 +82,7 @@ function create(){
     counter = 0;
     rows = 30;
     cols = 30;
-    weight = 1;
+    weight = 3;
     source = 0;
     end = 899;
 
@@ -139,8 +139,10 @@ async function improvePath(graph){
     var closed = [];
     var dist = [];
     var E = [];
+    
     heuristic(E);
     
+    var path = [];
     var incons = [];
     
     for (var i = 0; i < rows * cols; i++) {//initialize arrays
@@ -154,12 +156,12 @@ async function improvePath(graph){
         }
     }
     
-    search(graph, dist, closed, E, incons);
+    search(graph, dist, closed, E, path, incons);
     while (weight > 1){
         weight--;
         incons.sort( function(a, b) { return a - b; } ); //sort indices of incon in increasing order
 
-        search(graph, dist, closed, E, incons);
+        search(graph, dist, closed, E, path, incons);
     }
     /*for (var i = 0; i < 3; i++) {
         console.log("<br> ITERATION CUT <br>");
@@ -172,9 +174,8 @@ async function improvePath(graph){
     }*/
 }
 
-async function search(graph, dist, closed, E, incons) {
+async function search(graph, dist, closed, E, path, incons) {
 
-    var path = [];
 
     if (incons.length !== 0){
         var j = 0;//index for incons
@@ -185,6 +186,7 @@ async function search(graph, dist, closed, E, incons) {
                 j++;
             }
         }
+        incons.length = 0;
     }
     else
         console.log("incons is empty");
