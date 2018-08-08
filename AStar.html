@@ -5,30 +5,29 @@
     <title>Title</title>
 </head>
 <body>
-<script src="Loop.js"></script>
-<div style="position: absolute; left: 100px; top: 1100px">
+<div style="position: absolute; left: 1100px; top: 0px">
     <form id = "form">
-        <h1>Visualization</h1>
+        <h1>Enter Values</h1>
         Start position: <br><br>
         X coordinate: <input type="number" id="startX"/>
         Y coordinate: <input type="number" id="startY"/><br><br>
         End position: <br><br>
-        X coordinate: <input type="number" id="endX"/>
-        Y coordinate: <input type="number" id="endY"/><br><br>
+        X coordinate: <input type="number" id="goalX"/>
+        Y coordinate: <input type="number" id="goalY"/><br><br>
         Weight: 	   <input type="number" id="weight"/><br><br>
 
-        <button id="inputButton" onclick="input()">Set Values</button>
+        <button id="inputButton" type ="button" onclick="create()">Set Values</button>
 
     </form>
 
 </div>
 <div style="position: absolute; top: 0px; left: 0px;">
-    <h1>Path</h1>
+    <h1>Graph</h1>
     <canvas id="path" width ="1000" height="1000" style="position: absolute; z-index: 1">
         No canvas support.
     </canvas>
 </div>
 
-<script src = AStar2.js></script>
+<script src = AStar.js></script>
 </body>
 </html>
