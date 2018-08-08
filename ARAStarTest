@@ -114,8 +114,8 @@ function create(){
     }*/
 }
 function createGraph(){
-    rows = 7;
-    cols = 7;
+    rows = 8;
+    cols = 8;
     
     graph[0] = [];
     graph[0][0] = 1;
@@ -125,6 +125,7 @@ function createGraph(){
     graph[0][4] = 1;
     graph[0][5] = 0;
     graph[0][6] = 0;
+    graph[0][7] = 0;
     graph[1] = [];
     graph[1][0] = 1;
     graph[1][1] = 0;
@@ -133,6 +134,7 @@ function createGraph(){
     graph[1][4] = 1;
     graph[1][5] = 1;
     graph[1][6] = 0;
+    graph[1][7] = 0;
     graph[2] = [];
     graph[2][0] = 1;
     graph[2][1] = 1;
@@ -141,6 +143,7 @@ function createGraph(){
     graph[2][4] = 0;
     graph[2][5] = 1;
     graph[2][6] = 0;
+    graph[2][7] = 0;
     graph[3] = [];
     graph[3][0] = 0;
     graph[3][1] = 0;
@@ -148,7 +151,8 @@ function createGraph(){
     graph[3][3] = 1;
     graph[3][4] = 0;
     graph[3][5] = 1;
-    graph[3][6] = 0;
+    graph[3][6] = 1;
+    graph[3][7] = 1;
     graph[4] = [];
     graph[4][0] = 0;
     graph[4][1] = 0;
@@ -157,6 +161,7 @@ function createGraph(){
     graph[4][4] = 0;
     graph[4][5] = 1;
     graph[4][6] = 0;
+    graph[4][7] = 0;
     graph[5] = [];
     graph[5][0] = 0;
     graph[5][1] = 0;
@@ -165,6 +170,7 @@ function createGraph(){
     graph[5][4] = 0;
     graph[5][5] = 1;
     graph[5][6] = 0;
+    graph[5][7] = 0;
     graph[6] = [];
     graph[6][0] = 0;
     graph[6][1] = 0;
@@ -173,6 +179,16 @@ function createGraph(){
     graph[6][4] = 1;
     graph[6][5] = 1;
     graph[6][6] = 0;
+    graph[6][7] = 0;
+    graph[7] = [];
+    graph[7][0] = 0;
+    graph[7][1] = 0;
+    graph[7][2] = 0;
+    graph[7][3] = 0;
+    graph[7][4] = 0;
+    graph[7][5] = 0;
+    graph[7][6] = 0;
+    graph[7][7] = 0;
 
     
     drawGrid();    
