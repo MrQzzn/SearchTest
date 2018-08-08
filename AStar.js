@@ -1,39 +1,74 @@
-create();
-
-//var path = []; //for the actual path, not closed list
+var graph = [];
 var rows;
 var cols;
 var counter;
-var source;
-var end;
+var start;
+var goal;
 var weight;
+createGraph();
 
 function input(){
-    source = parseInt(document.getElementById("startX").value) * 10 + parseInt(document.getElementById("startY").value);
-    end = parseInt(document.getElementById("endX").value) * 10 + parseInt(document.getElementById("endY").value);
-    weight = parseInt(document.getElementById("weight").value);
-    document.write("START = " + start +  " END = " + end + " WEIGHT = " + weight);
+    weight = document.getElementById("weight").value;
+    start = parseFloat(document.getElementById("startX").value) * rows + parseFloat(document.getElementById("startY").value);
+    goal = parseFloat(document.getElementById("goalX").value) * rows + parseFloat(document.getElementById("goalY").value);
 }
-
-function drawPath(closed, dist, graph, path) {
+function drawGrid(){
     var p = document.getElementById('path');
     var ctx = p.getContext('2d');
     p.style.left = "1100 px";
     p.style.position = "absolute";
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 4;
-
     var pathCanvasSize = 1000;
     var boxSize = pathCanvasSize/rows;
-
     var i = 0;
-    var j = 0;
+
     for (var y = 0; y < cols; y++) {
         for (var x = 0; x < rows; x++) { //add boxes by rows
-            if (i === source){
-                ctx.fillStyle = 'rgba(196,0,255,1)'; //source = purple
+            if (i === start){
+                ctx.fillStyle = 'rgba(196,0,255,1)'; //start = purple
             }
-            else if (i === end){
+            else if (i === goal){
+                ctx.fillStyle = 'rgba(256,0,0,1)'; //goal = red
+            }
+            else if (graph[Math.floor(i/rows)][i%cols] === 0){ //a wall
+                ctx.fillStyle = 'rgba(165,165,165,1)';
+            }
+            else                              //everything else white
+                ctx.fillStyle = 'rgba(256,256,256,1)';
+            i++;
+            ctx.beginPath();
+            ctx.moveTo(x * boxSize, y * boxSize);
+            ctx.lineTo(x * boxSize + boxSize, y * boxSize);
+            ctx.stroke();
+            ctx.lineTo(x * boxSize + boxSize, y * boxSize + boxSize);
+            ctx.stroke();
+            ctx.lineTo(x * boxSize, y * boxSize + boxSize);
+            ctx.stroke();
+            ctx.lineTo(x * boxSize, y * boxSize);
+            ctx.stroke();
+            ctx.fill();
+        }
+    }
+}  
+function drawPath(closed, dist, path) {
+    var p = document.getElementById('path');
+    var ctx = p.getContext('2d');
+    p.style.left = "1100 px";
+    p.style.position = "absolute";
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 4;
+    var pathCanvasSize = 1000;
+    var boxSize = pathCanvasSize/rows;
+    var i = 0;
+    var j = 0;
+
+    for (var y = 0; y < cols; y++) {
+        for (var x = 0; x < rows; x++) { //add boxes by rows
+            if (i === start){
+                ctx.fillStyle = 'rgba(196,0,255,1)'; //start = purple
+            }
+            else if (i === goal){
                 ctx.fillStyle = 'rgba(256,0,0,1)'; //goal = red
             }
             else if (graph[Math.floor(i/rows)][i%cols] === 0){ //a wall
@@ -65,91 +100,44 @@ function drawPath(closed, dist, graph, path) {
             ctx.fill();
         }
     }
-    if (path !== undefined && path.length !== 0) {
-        path.sort( function(a, b) { return a - b; } );
-        var j = 0;
-        var i = 0;
-        for (var y = boxSize/2; y < pathCanvasSize; y+=boxSize){
-            for (var x = boxSize/2 - 0.15*boxSize; x < pathCanvasSize; x+=boxSize){
-                if (i === path[j]) {
-                    ctx.fillText("O", x, y);
-                    j++;
-                }
-                i++;
-
-            }
-        }
-    }
-    /*var j = 0;
-    ctx.font="30px Georgia";
-    ctx.fillStyle = 'rgba(110,0,132,1)';
-    for (var y = boxSize/2; y < pathCanvasSize; y+=boxSize){
-        for (var x = boxSize/2 - 0.15*boxSize; x < pathCanvasSize; x+=boxSize){
-            if (dist[j] !== -1 && dist[j] !== 0)
-                ctx.fillText(dist[j],x,y);
-            j++;
-        }
-    }*/
 }
 function create(){
-    var graph = [];
-    //input();
     counter = 0;
+    input();
+    search();
+}
+function createGraph(){
     rows = 30;
     cols = 30;
-    weight = 5;
-    source = 0;
-    end = 899;
-
-    createGraph(graph);
-    //drawGrid(graph);
-    search(graph);
-}
-function createGraph(graph){
-    /*for (var i = 0; i < rows; i++){
-        graph[i] = [];
-        for (var j = 0; j < cols; j++){
-            graph[i][j] = Math.floor(Math.random() * 10);
-            if ((i*rows + j) === source || (i*rows + j) === end) { //if i is either source or end, while graph of i = 0, keep switching values
-                while (graph[i][j] === 0) {
-                    graph[i][j] = Math.floor(Math.random() * 10);
-                }
-            }
-        }
-    }*/
     for (var i = 0; i < rows; i++) {
         graph[i] = [];
         for (var j = 0; j < cols; j++) {
-            var chance = Math.floor(Math.random() * 4);
+            var chance = Math.floor(Math.random() * 5);
             if (chance === 0){
                 graph[i][j] = 0;
             }
             else
                 graph[i][j] = 1;
-            if ((i * rows + j) === source || (i * rows + j) === end) { //if i is either source or end, while graph of i = 0, keep switching values
+            if ((i * rows + j) === start || (i * rows + j) === goal) { //if i is either start or goal, while graph of i = 0, keep switching values
                 while (graph[i][j] === 0) {
                     graph[i][j] = 1;
                 }
             }
         }
     }
-    return graph;
+    drawGrid();    
 }
 function heuristic(E){
-    //document.write("heuristic values: ");
     for (var i = 0; i < rows*cols; i++){
-        E.push(Math.abs(Math.floor(end/rows) - Math.floor(i/rows)) + Math.abs(end%rows - i%rows))
-        /*if (counter%rows === 0)
-            document.write("<br>");
-        document.write(E[i] + " ");
-        counter++;*/
+        E.push(Math.abs(Math.floor(goal/rows) - Math.floor(i/rows)) + Math.abs(goal%rows - i%rows))
+        
     }
 }
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-async function search(graph) {
+async function search() {
     var path = [];
     var closed = [];
     var mClosed = [];
@@ -166,23 +154,9 @@ async function search(graph) {
             dist.push(0);
         }
     }
-    /*document.write("<br> initial dist[]:");
-    for (var i = 0; i < rows*cols; i++){
-        if (counter%rows === 0)
-            document.write("<br>");
-        document.write(dist[i] + " ");
-        counter++;
-    }
-    document.write("<br> initial closed[]:")
-    for (var i = 0; i < rows*cols; i++){
-        if (counter%rows === 0)
-            document.write("<br>");
-        document.write(closed[i] + " ");
-        counter++;
-    }*/
-    var lowestAdj = source; //initialize first adj index to source
-    dist[source] = 0; //we start at 0 distance
-    closed[source] = true; //change source's closed value
+    var lowestAdj = start; //initialize first adj index to start
+    dist[start] = 0; //we start at 0 distance
+    closed[start] = true; //change start's closed value
     loop1:
         for (var j = 0; j < rows * cols; j++) {
             for (var adjIndex = 0; adjIndex < rows * cols; adjIndex++) {
@@ -202,15 +176,15 @@ async function search(graph) {
             closed[lowestAdj] = true;
             drawPath(closed, dist, graph, path);
 
-            if (lowestAdj === -1 || lowestAdj === end) //lowestAdj becomes -1 when the closed array is filled with true
+            if (lowestAdj === -1 || lowestAdj === goal) //lowestAdj becomes -1 when the closed array is filled with true
                 break loop1;
             await sleep(50);
         }
     path = chartPath(dist, closed, path);
-    drawPath(closed, dist, graph, path);
+    drawPath(closed, dist, path);
     printPath(dist); //using document.write() clears the page
 }
-function findMin(dist, E, closed, graph){
+function findMin(dist, E, closed){
     var min = 42424242;
     var minIndex= -1;
     for (var i = 0; i < rows*cols; i++){
@@ -281,8 +255,8 @@ function adjacentTo(center, neighbor) {
 }
 function chartPath(dist, closed) {
     var path = [];
-    path.push(end);
-    var min = end;
+    path.push(goal);
+    var min = goal;
     var index = 1;
     loop2:
     for (var i = 0; i < closed.length; i++){ //path can be as long as closed, could use more efficient loop but no idea how to move closed's true values into a separate array
@@ -294,8 +268,8 @@ function chartPath(dist, closed) {
                 }
             }
         }
-        if (min === source){
-            console.log("reached source");
+        if (min === start){
+            console.log("reached start");
             break loop2;
         }
         if (min !== path[index-1]) {//if not the same as the last one
@@ -310,9 +284,9 @@ function chartPath(dist, closed) {
     return path;
 }
 function printPath(dist) {
-    if (dist[end] === -1) {
+    if (dist[goal] === -1) {
         console.log("oops, something went wrong");
     }
     else
-        console.log("the distance to (" + Math.floor(end/rows) + ", " + end%rows + ") is " + (dist[end]-dist[source]));
+        console.log("the distance to (" + Math.floor(goal/rows) + ", " + goal%rows + ") is " + (dist[goal]-dist[start]));
 }
